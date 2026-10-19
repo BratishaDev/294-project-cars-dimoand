@@ -1,5 +1,4 @@
 <template>
-  <!-- Conteneur principal pour structurer la disposition de la page -->
   <v-container>
     <h1 class="text-h3 text-center my-6">
       Cars
