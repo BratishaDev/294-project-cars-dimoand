@@ -8,22 +8,11 @@
         v-for="car in cars"
         :key="car.id"
         cols="12"
-        lg="3"
+        lg="4"
         md="4"
         sm="6"
       >
-        <v-card
-          hover
-        >
-          <v-img
-            :alt="car.displayName"
-            cover
-            height="200"
-            :src="car.url[1] ?? car.url[0]"
-          />
-          <v-card-title>{{ car.displayName }}</v-card-title>
-          <v-card-subtitle>Power {{ car.powerHp }} HP</v-card-subtitle>
-        </v-card>
+        <car-card :car="car" />
       </v-col>
     </v-row>
   </v-container>
@@ -32,6 +21,7 @@
 <script setup>
   import axios from 'axios'
   import { onMounted, ref } from 'vue'
+  import CarCard from '@/components/CarCard.vue'
 
   const cars = ref([])
 
@@ -39,7 +29,7 @@
     try {
       const response = await axios.get('https://apis.divtec.me/api/cars/variants?limit=50')
       cars.value = response.data.data
-      console.log('Voitures chargés :', response.data)
+      console.log('Voitures chargés :', response.data.data)
     } catch (error) {
       // En cas d’erreur, on affiche le message d’erreur
       console.error('Erreur lors de la récupération des voitures:', error)
