@@ -10,6 +10,7 @@
 <template>
   <v-card
     hover
+    :to="`/car/${car.id}`"
   >
     <v-img
       :alt="car.displayName"
