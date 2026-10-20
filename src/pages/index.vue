@@ -19,7 +19,7 @@
             :alt="car.displayName"
             cover
             height="200"
-            :src="car.url[0]"
+            :src="car.url[1] ?? car.url[0]"
           />
           <v-card-title>{{ car.displayName }}</v-card-title>
           <v-card-subtitle>Power {{ car.powerHp }} HP</v-card-subtitle>
