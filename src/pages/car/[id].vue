@@ -20,6 +20,7 @@
     chargerCar()
   })
 </script>
+
 <template>
   <v-container>
     <v-btn
