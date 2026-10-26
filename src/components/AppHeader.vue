@@ -25,6 +25,8 @@
   import logoStatic from '@/assets/cars_logo_static.png'
   const menuItems = [
     { title: 'Accueil', path: '/', icon: 'mdi-car' },
+    { title: 'Favoris', path: '/favoris', icon: 'mdi-heart' },
+    { title: 'À propos', path: '/a-propos', icon: 'mdi-information' },
   ]
   const isHovered = ref(false)
 </script>
