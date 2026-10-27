@@ -39,7 +39,7 @@ src/
 │   ├── [...path].vue  # 404 page
 │   └── README.md      # Pages documentation
 ├── stores/            # Pinia stores for state management
-│   ├── pokemonStore.js # Main Pokémon data and functionality
+│   ├── carStore.js # Main Pokémon data and functionality
 │   ├── authStore.js   # Authentication simulation
 │   └── index.js       # Store configuration
 ├── plugins/           # Plugin configuration
@@ -94,7 +94,7 @@ After making changes, ALWAYS validate these scenarios:
 - ✅ Auto-import for components and Vue composables
 
 ### Pokémon Store Functionality
-The `pokemonStore.js` contains full CRUD functionality:
+The `carStore.js` contains full CRUD functionality:
 - **State**: 10 pre-loaded Pokémon, 14 types, favorites array
 - **Getters**: `getTypeById`, `getPokemonById`, `isFavorite`, `getFavorites`, `totalPokemons`
 - **Actions**: `addPokemon`, `updatePokemon`, `deletePokemon`, `toggleFavorite`, `loadFavorites`
