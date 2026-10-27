@@ -10,6 +10,10 @@
 
 <script setup>
   import AppFooter from '@/components/AppFooter.vue'
-  // Importation du composant AppHeader pour l'en-tête de l'application
   import AppHeader from '@/components/AppHeader.vue'
+  import { useCarsStore } from '@/stores/carStore'
+  onMounted(async () => {
+    const carsStore = useCarsStore()
+    await carsStore.init()
+  })
 </script>

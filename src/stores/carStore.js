@@ -32,12 +32,14 @@ export const useCarsStore = defineStore('cars', {
 
     // Toutes les versions d'une même génération (pour la page de détails)
     getVariantsByGeneration: (state) => (generationId) => {
-      return state.cars.filter(car => String(car.generationId) === String(generationId))
+      const id = Number(generationId)
+      return state.cars.filter(car => car.generationId === id)
     },
 
     // Une version spécifique par ID
     getCarById: (state) => (carId) => {
-      return state.cars.find(car => String(car.id) === String(carId))
+      const id = Number(carId)
+      return state.cars.find(car => car.id === id)
     },
   },
 

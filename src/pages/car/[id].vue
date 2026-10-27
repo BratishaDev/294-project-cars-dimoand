@@ -1,23 +1,11 @@
 <script setup>
-  import axios from 'axios'
-  import { onMounted, ref } from 'vue'
+  import { useCarsStore } from '@/stores/carStore'
 
   const route = useRoute()
-  const car = ref(null)
 
-  async function chargerCar () {
-    try {
-      const response = await axios.get(`https://apis.divtec.me/api/cars/variants/${route.params.id}`)
-      car.value = response.data
-      console.log('Voitures chargés :', response.data.data)
-    } catch (error) {
-      // En cas d’erreur, on affiche le message d’erreur
-      console.error('Erreur lors de la récupération des voitures:', error)
-    }
-  }
-
-  onMounted(() => {
-    chargerCar()
+  const carsStore = useCarsStore()
+  const car = computed(() => {
+    return carsStore.getCarById(route.params.id)
   })
 </script>
 

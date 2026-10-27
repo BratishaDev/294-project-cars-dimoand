@@ -5,38 +5,25 @@
     </h1>
     <v-row>
       <v-col
-        v-for="car in cars"
-        :key="car.id"
+        v-for="generation in generations"
+        :key="generation.generationId"
         cols="12"
         lg="4"
         md="4"
         sm="6"
       >
-        <car-card :car="car" />
+        <car-card :car="generation.main" />
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script setup>
-  import axios from 'axios'
-  import { onMounted, ref } from 'vue'
+
+  import { storeToRefs } from 'pinia'
   import CarCard from '@/components/CarCard.vue'
+  import { useCarsStore } from '@/stores/carStore'
 
-  const cars = ref([])
-
-  async function chargerCars () {
-    try {
-      const response = await axios.get('https://apis.divtec.me/api/cars/variants?limit=50')
-      cars.value = response.data.data
-      console.log('Voitures chargés :', response.data.data)
-    } catch (error) {
-      // En cas d’erreur, on affiche le message d’erreur
-      console.error('Erreur lors de la récupération des voitures:', error)
-    }
-  }
-
-  onMounted(() => {
-    chargerCars()
-  })
+  const carsStore = useCarsStore()
+  const { generations } = storeToRefs(carsStore)
 </script>
