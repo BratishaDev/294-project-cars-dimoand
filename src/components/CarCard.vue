@@ -15,7 +15,7 @@
     <v-img
       :alt="car.displayName"
       cover
-      height="220"
+      height="230"
       :src="car.url?.[1] || car.url?.[0] || '/images/sports_car_placeholder.png'"
     />
     <v-card-title>{{ car.displayName }}</v-card-title>

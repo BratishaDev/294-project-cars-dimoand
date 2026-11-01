@@ -7,6 +7,9 @@
   const car = computed(() => {
     return carsStore.getCarById(route.params.id)
   })
+
+  const photos = computed(() => car.value?.url ?? [])
+  const slide = ref(1)
 </script>
 
 <template>
@@ -33,11 +36,41 @@
       class="mx-auto"
       max-width="800"
     >
+      <!-- Option 1 : plusieurs photos, galerie -->
+      <v-carousel
+        v-if="photos.length > 1"
+        v-model="slide"
+        crossfade
+        height="500"
+        hide-delimiters
+        show-arrows="hover"
+        slower
+      >
+        <v-carousel-item
+          v-for="(photo, index) in photos"
+          :key="index"
+          :alt="`${car.displayName} - photo ${index + 1}`"
+          cover
+          :src="photo"
+        />
+      </v-carousel>
+
+      <!-- Option 2 : une seule photo -->
       <v-img
+        v-else-if="photos.length === 1"
         :alt="car.displayName"
         cover
-        height="400"
-        :src="car.url?.[1] || car.url?.[0] || '/images/sports_car_placeholder.png'"
+        height="500"
+        :src="photos[0]"
+      />
+
+      <!-- Option 3 : aucune photo -->
+      <v-img
+        v-else
+        alt="Pas de photo"
+        cover
+        height="450"
+        src="/images/sports_car_placeholder.png"
       />
 
       <v-card-title class="text-h4">
