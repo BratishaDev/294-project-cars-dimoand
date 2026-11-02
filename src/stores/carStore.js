@@ -44,12 +44,12 @@ export const useCarsStore = defineStore('cars', {
   },
 
   actions: {
-    async fetchCars() {
+    async fetchCars () {
       const response = await axios.get('https://apis.divtec.me/api/cars/variants?limit=100')
       this.cars = response.data.data
     },
 
-    async init() {
+    async init () {
       this.isLoading = true
       this.error = null
       try {
