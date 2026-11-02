@@ -1,5 +1,5 @@
-import axios from 'axios'
 import { defineStore } from 'pinia'
+import api from '@/plugins/axios'
 
 export const useCarsStore = defineStore('cars', {
   state: () => ({
@@ -44,9 +44,19 @@ export const useCarsStore = defineStore('cars', {
   },
 
   actions: {
-    async fetchCars () {
-      const response = await axios.get('https://apis.divtec.me/api/cars/variants?limit=100')
-      this.cars = response.data.data
+    async fetchCars ({ withLoader = true } = {}) {
+      if (withLoader) this.isLoading = true
+
+      try {
+        const response = await api.get('/variants', { params: { limit: 100 } })
+        this.cars = response.data.data
+      } catch (error) {
+        console.error('Erreur:', error.message)
+        this.error = 'Erreur lors du chargement des voitures'
+        this.cars = []
+      } finally {
+        if (withLoader) this.isLoading = false
+      }
     },
 
     async init () {
