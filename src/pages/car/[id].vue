@@ -11,7 +11,7 @@
 
   const photos = computed(() => car.value?.url ?? [])
 
-  // Все версии этого поколения, от слабой к мощной
+  // Toutes les versions de cette génération, de la moins puissante à la plus puissante
   const variants = computed(() => {
     if (!car.value) return []
     const list = carsStore.getVariantsByGeneration(car.value.generationId)
@@ -40,7 +40,7 @@
     ].filter(spec => spec.value != null)
   })
 
-  // При переходе на другую версию: галерея на 2-е фото, страница наверх
+  // En cas de passage à une autre version : galerie sur la 2e photo, retour en haut de la page
   watch(() => route.params.id, () => {
     slide.value = 1
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -68,7 +68,7 @@
 
     <template v-else>
       <v-row>
-        <!-- Галерея -->
+        <!-- Galerie -->
         <v-col cols="12" md="7">
           <!-- Option 1 : plusieurs photos, galerie -->
           <v-carousel
