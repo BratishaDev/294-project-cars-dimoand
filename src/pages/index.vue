@@ -40,7 +40,7 @@
         md="6"
         sm="6"
       >
-        <car-card :car="generation.main" />
+        <car-card :car="generation.main" :count="generation.count" />
       </v-col>
     </v-row>
   </v-container>
