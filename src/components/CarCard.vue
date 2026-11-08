@@ -22,6 +22,10 @@
       height="230"
       :src="car.url?.[1] || car.url?.[0] || '/images/sports_car_placeholder.png'"
     />
+
+    <v-card-title class="text-wrap">
+      {{ car.displayName }}
+    </v-card-title>
     <v-card-text>
       <v-chip v-if="car.fuelSlug" class="mr-2" size="small">
         {{ car.fuelSlug }}
