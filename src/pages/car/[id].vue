@@ -63,7 +63,7 @@
       type="error"
       variant="tonal"
     >
-      Voiture non trouvé.
+      Voiture non trouvée.
     </v-alert>
 
     <template v-else>

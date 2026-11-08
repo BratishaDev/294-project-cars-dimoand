@@ -6,16 +6,50 @@ export const useCarsStore = defineStore('cars', {
     cars: [],
     isLoading: false,
     error: null,
+    // Recherche et filtres
+    search: '',
+    bodyType: null,
+    sortBy: 'default',
   }),
 
   getters: {
     totalCars: (state) => state.cars.length,
 
-    // Liste des générations : un élément par generationId
-    generations: (state) => {
+    // Types de carrosserie disponibles (pour le menu déroulant)
+    bodyTypes: (state) => {
+      const types = state.cars.map(car => car.bodyTypeEn).filter(Boolean)
+      return [...new Set(types)].sort()
+    },
+
+    // Y a-t-il au moins un filtre actif ? (pour le bouton de réinitialisation)
+    hasActiveFilters: (state) => {
+      return Boolean(state.search) || Boolean(state.bodyType) || state.sortBy !== 'default'
+    },
+
+    // Versions qui passent la recherche et les filtres, puis triées
+    filteredCars: (state) => {
+      const query = (state.search ?? '').trim().toLowerCase()
+
+      const list = state.cars.filter(car => {
+        const matchesSearch = !query || (car.displayName ?? '').toLowerCase().includes(query)
+        const matchesBody = !state.bodyType || car.bodyTypeEn === state.bodyType
+        return matchesSearch && matchesBody
+      })
+
+      // filter() a créé un nouveau tableau, on peut donc le trier sans toucher à state.cars
+      if (state.sortBy !== 'default') {
+        const direction = state.sortBy === 'name-desc' ? -1 : 1
+        list.sort((a, b) => direction * (a.displayName ?? '').localeCompare(b.displayName ?? ''))
+      }
+
+      return list
+    },
+
+    // Liste des générations, construite à partir des versions filtrées
+    generations () {
       const groups = new Map()
 
-      for (const car of state.cars) {
+      for (const car of this.filteredCars) {
         if (!groups.has(car.generationId)) {
           groups.set(car.generationId, [])
         }
@@ -70,6 +104,13 @@ export const useCarsStore = defineStore('cars', {
       } finally {
         this.isLoading = false
       }
+    },
+
+    // Remet la recherche, le filtre et le tri à zéro
+    resetFilters () {
+      this.search = ''
+      this.bodyType = null
+      this.sortBy = 'default'
     },
   },
 })
