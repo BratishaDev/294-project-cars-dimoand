@@ -10,6 +10,8 @@ export const useCarsStore = defineStore('cars', {
     search: '',
     bodyType: null,
     sortBy: 'name-asc',
+    // ★ Favoris : tableau d'ID de versions (car.id)
+    favorites: [],
   }),
 
   getters: {
@@ -73,6 +75,30 @@ export const useCarsStore = defineStore('cars', {
       const id = Number(carId)
       return state.cars.find(car => car.id === id)
     },
+
+    // Nombre de favoris
+    totalFavorites: (state) => state.favorites.length,
+
+    // Cette version précise est-elle en favoris ?
+    isFavorite: (state) => (car) => {
+      return state.favorites.includes(car.id)
+    },
+
+    // Au moins une version de cette génération est-elle en favoris ?
+    hasFavoriteInGeneration: (state) => (generationId) => {
+      const id = Number(generationId)
+      return state.cars.some(car => {
+        return car.generationId === id && state.favorites.includes(car.id)
+      })
+    },
+
+    // Objets voiture des favoris (pas seulement les ID)
+    getFavorites: (state) => {
+      const favoriteCars = state.favorites.map(favoriteId => {
+        return state.cars.find(car => car.id === favoriteId)
+      })
+      return favoriteCars.filter(car => car !== undefined)
+    },
   },
 
   actions: {
@@ -82,6 +108,7 @@ export const useCarsStore = defineStore('cars', {
       try {
         const response = await api.get('/variants', { params: { limit: 100 } })
         this.cars = response.data.data
+        this.cleanupFavorites()
       } catch (error) {
         console.error('Erreur:', error.message)
         this.error = 'Erreur lors du chargement des voitures'
@@ -94,6 +121,7 @@ export const useCarsStore = defineStore('cars', {
     async init () {
       this.isLoading = true
       this.error = null
+      this.loadFavorites() // AVANT le chargement des voitures
       try {
         await this.fetchCars()
       } catch (error) {
@@ -109,6 +137,60 @@ export const useCarsStore = defineStore('cars', {
       this.search = ''
       this.bodyType = null
       this.sortBy = 'name-asc'
+    },
+
+    // Charge les favoris depuis localStorage
+    loadFavorites () {
+      try {
+        const saved = localStorage.getItem('car_favorites')
+        const parsed = saved ? JSON.parse(saved) : []
+        this.favorites = Array.isArray(parsed) ? parsed : []
+        console.log('Favoris chargés :', this.favorites.length, 'éléments')
+      } catch (error) {
+        console.error('Erreur lors du chargement des favoris :', error)
+        this.favorites = []
+      }
+    },
+
+    // Sauvegarde les favoris dans localStorage
+    saveFavorites () {
+      try {
+        localStorage.setItem('car_favorites', JSON.stringify(this.favorites))
+      } catch (error) {
+        console.error('Erreur lors de la sauvegarde des favoris :', error)
+      }
+    },
+
+    // Ajoute ou retire une version des favoris
+    toggleFavorite (car) {
+      const favoriteIndex = this.favorites.findIndex(
+        favoriteId => favoriteId === car.id,
+      )
+
+      if (favoriteIndex === -1) {
+        this.favorites.push(car.id)
+      } else {
+        this.favorites.splice(favoriteIndex, 1)
+      }
+
+      this.saveFavorites()
+    },
+
+    // Supprime les favoris dont la voiture n'existe plus dans l'API
+    cleanupFavorites () {
+      if (this.cars.length === 0) return
+
+      const initialCount = this.favorites.length
+
+      this.favorites = this.favorites.filter(favoriteId => {
+        return this.cars.some(car => car.id === favoriteId)
+      })
+
+      const removedCount = initialCount - this.favorites.length
+      if (removedCount > 0) {
+        console.log('Nettoyage :', removedCount, 'favoris obsolètes supprimés')
+        this.saveFavorites()
+      }
     },
   },
 })
