@@ -6,7 +6,7 @@
 
     <!-- Recherche, filtre et tri -->
     <v-row align="center" class="mb-2">
-      <v-col cols="12" md="4">
+      <v-col cols="12" lg="5" md="4">
         <v-text-field
           v-model="carsStore.search"
           clearable
@@ -24,7 +24,7 @@
           label="Carrosserie"
         />
       </v-col>
-      <v-col cols="12" md="3" sm="6">
+      <v-col cols="12" md="2" sm="6">
         <v-select
           v-model="carsStore.sortBy"
           hide-details
@@ -32,7 +32,7 @@
           label="Trier par"
         />
       </v-col>
-      <v-col cols="12" md="2">
+      <v-col cols="12" lg="2" md="3">
         <v-btn
           block
           :disabled="!hasActiveFilters"
@@ -105,7 +105,7 @@
   import { storeToRefs } from 'pinia'
   import CarCard from '@/components/CarCard.vue'
   import { useCarsStore } from '@/stores/carStore'
-  
+
   const carsStore = useCarsStore()
   const { generations, bodyTypes, hasActiveFilters } = storeToRefs(carsStore)
 
