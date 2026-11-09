@@ -1,16 +1,43 @@
-<script setup>
-
-</script>
-
 <template>
   <v-container>
-    <h1 class="text-h3 text-center my-6">Mes favoris</h1>
-    <v-alert type="info" variant="tonal">
-      Vous n'avez pas encore de Voitures favoris.
+    <h1 class="text-h3 text-center my-6">
+      Mes favoris ({{ carsStore.totalFavorites }})
+    </h1>
+
+    <v-progress-linear
+      v-if="carsStore.isLoading"
+      class="mb-6"
+      indeterminate
+    />
+
+    <v-alert
+      v-else-if="carsStore.totalFavorites === 0"
+      class="mb-6"
+      type="info"
+      variant="tonal"
+    >
+      Vous n'avez pas encore de voitures favorites.
+      Cliquez sur le cœur d'une voiture pour l'ajouter !
     </v-alert>
+
+    <v-row v-else>
+      <v-col
+        v-for="car in carsStore.getFavorites"
+        :key="car.id"
+        cols="12"
+        lg="4"
+        md="6"
+        sm="6"
+      >
+        <car-card :car="car" />
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
-<style scoped>
+<script setup>
+  import CarCard from '@/components/CarCard.vue'
+  import { useCarsStore } from '@/stores/carStore'
 
-</style>
+  const carsStore = useCarsStore()
+</script>

@@ -45,9 +45,26 @@
     slide.value = 1
     window.scrollTo({ top: 0, behavior: 'smooth' })
   })
+
+  const showSnackbar = ref(false)
+  const snackbarMessage = ref('')
+
+  function handleToggleFavorite () {
+    const wasFavorite = carsStore.isFavorite(car.value)
+    carsStore.toggleFavorite(car.value)
+    snackbarMessage.value = wasFavorite ? 'Retiré des favoris' : 'Ajouté aux favoris'
+    showSnackbar.value = true
+  }
 </script>
 
 <template>
+  <v-snackbar
+    v-model="showSnackbar"
+    color="primary"
+    :timeout="2000"
+  >
+    {{ snackbarMessage }}
+  </v-snackbar>
   <v-container>
     <v-btn
       class="mb-4"
@@ -110,9 +127,19 @@
 
         <!-- Informations -->
         <v-col cols="12" md="5">
-          <h1 class="text-h4 mb-3">
-            {{ car.displayName }}
-          </h1>
+          <div class="d-flex align-start justify-space-between ga-4 mb-3">
+            <h1 class="text-h4">
+              {{ car.displayName }}
+            </h1>
+            <v-btn
+              :class="{ 'favorite-active': carsStore.isFavorite(car) }"
+              :color="carsStore.isFavorite(car) ? 'red' : ''"
+              :icon="carsStore.isFavorite(car) ? 'mdi-heart' : 'mdi-heart-outline'"
+              :title="carsStore.isFavorite(car) ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+              variant="text"
+              @click="handleToggleFavorite()"
+            />
+          </div>
 
           <div class="mb-3">
             <v-chip class="mr-2">{{ fuelLabel(car.fuelSlug) }}</v-chip>
@@ -177,9 +204,22 @@
             <td>{{ variant.powerHp }} ch</td>
             <td>{{ variant.accel0100S }} s</td>
             <td>{{ formatPrice(variant.priceNewEur) }}</td>
+            <td>
+              <v-icon
+                :color="carsStore.isFavorite(variant) ? 'red' : 'grey'"
+                :icon="carsStore.isFavorite(variant) ? 'mdi-heart' : 'mdi-heart-outline'"
+                size="small"
+              />
+            </td>
           </tr>
         </tbody>
       </v-table>
     </template>
   </v-container>
 </template>
+
+<style scoped>
+  .favorite-active {
+    animation: heartbeat 0.6s ease-in-out;
+  }
+</style>
