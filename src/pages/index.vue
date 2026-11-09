@@ -110,7 +110,6 @@
   const { generations, bodyTypes, hasActiveFilters } = storeToRefs(carsStore)
 
   const sortItems = [
-    { title: 'Par défaut', value: 'default' },
     { title: 'Nom A → Z', value: 'name-asc' },
     { title: 'Nom Z → A', value: 'name-desc' },
   ]

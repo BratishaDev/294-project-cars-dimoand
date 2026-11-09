@@ -9,7 +9,7 @@ export const useCarsStore = defineStore('cars', {
     // Recherche et filtres
     search: '',
     bodyType: null,
-    sortBy: 'default',
+    sortBy: 'name-asc',
   }),
 
   getters: {
@@ -23,7 +23,7 @@ export const useCarsStore = defineStore('cars', {
 
     // Y a-t-il au moins un filtre actif ? (pour le bouton de réinitialisation)
     hasActiveFilters: (state) => {
-      return Boolean(state.search) || Boolean(state.bodyType) || state.sortBy !== 'default'
+      return Boolean(state.search) || Boolean(state.bodyType) || state.sortBy !== 'name-asc'
     },
 
     // Versions qui passent la recherche et les filtres, puis triées
@@ -37,10 +37,8 @@ export const useCarsStore = defineStore('cars', {
       })
 
       // filter() a créé un nouveau tableau, on peut donc le trier sans toucher à state.cars
-      if (state.sortBy !== 'default') {
-        const direction = state.sortBy === 'name-desc' ? -1 : 1
-        list.sort((a, b) => direction * (a.displayName ?? '').localeCompare(b.displayName ?? ''))
-      }
+      const direction = state.sortBy === 'name-desc' ? -1 : 1
+      list.sort((a, b) => direction * (a.displayName ?? '').localeCompare(b.displayName ?? ''))
 
       return list
     },
@@ -110,7 +108,7 @@ export const useCarsStore = defineStore('cars', {
     resetFilters () {
       this.search = ''
       this.bodyType = null
-      this.sortBy = 'default'
+      this.sortBy = 'name-asc'
     },
   },
 })
