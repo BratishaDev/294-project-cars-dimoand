@@ -8,3 +8,10 @@
 // @use 'vuetify/settings' with (
 //   $color-pack: false
 // );
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  25%       { transform: scale(1.5); }
+  50%       { transform: scale(1.1); }
+  75%       { transform: scale(2); }
+}
