@@ -56,10 +56,10 @@
     </v-card-title>
 
     <v-card-text>
-      <v-chip v-if="car.fuelSlug" class="mr-2" size="small">
+      <v-chip v-if="car.fuelSlug" class="mr-2" color="primary" size="small" variant="tonal">
         {{ car.fuelSlug }}
       </v-chip>
-      <v-chip v-if="car.bodyTypeEn" size="small">
+      <v-chip v-if="car.bodyTypeEn" color="primary" size="small" variant="tonal">
         {{ car.bodyTypeEn }}
       </v-chip>
     </v-card-text>

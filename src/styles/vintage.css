@@ -1,0 +1,11 @@
+/* Titres des cartes et de la barre : police à empattements */
+.v-toolbar-title,
+.v-card-title {
+    font-family: 'Fraunces', serif;
+    letter-spacing: 0.01em;
+}
+
+/* Fine ligne laiton sous la barre de navigation */
+.v-app-bar {
+    border-bottom: 2px solid rgba(var(--v-theme-primary), 0.35) !important;
+}

@@ -37,6 +37,7 @@
           block
           :disabled="!hasActiveFilters"
           height="56"
+          color="primary"
           prepend-icon="mdi-filter-remove"
           variant="tonal"
           @click="carsStore.resetFilters()"

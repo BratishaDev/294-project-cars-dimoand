@@ -33,6 +33,10 @@ export default defineConfig({
         families: [{
           name: 'Roboto',
           styles: 'wght@100;300;400;500;700;900',
+        },
+        {
+          name: 'Fraunces',
+          styles: 'wght@400;600;700',
         }],
       },
     }),

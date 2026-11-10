@@ -148,7 +148,7 @@
 
           <p class="text-body-1 mb-4" v-html="summary" />
 
-          <div class="text-h5 mb-4">
+          <div class="text-h5 text-primary mb-4">
             {{ formatPrice(car.priceNewEur) }}
           </div>
 

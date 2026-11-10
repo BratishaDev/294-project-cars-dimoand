@@ -13,6 +13,7 @@
       <v-btn
         v-for="link in menuItems"
         :key="link.title"
+        color="primary"
         :icon="link.icon"
         :to="link.path"
       />

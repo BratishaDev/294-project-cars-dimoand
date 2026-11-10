@@ -9,6 +9,10 @@
 //   $color-pack: false
 // );
 
+@use 'vuetify/settings' with (
+  $heading-font-family: ('Fraunces', serif),
+);
+
 @keyframes heartbeat {
   0%, 100% { transform: scale(1); }
   25%       { transform: scale(1.5); }
