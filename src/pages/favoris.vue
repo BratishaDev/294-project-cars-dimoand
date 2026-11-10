@@ -10,6 +10,16 @@
       indeterminate
     />
 
+    <!-- Si l'API est en panne, les favoris (des ID) sont gardés mais on ne peut pas afficher les voitures -->
+    <v-alert
+      v-else-if="carsStore.error"
+      class="mb-6"
+      type="error"
+      variant="tonal"
+    >
+      Impossible de charger les voitures. Vos favoris sont conservés, réessayez plus tard.
+    </v-alert>
+
     <v-alert
       v-else-if="carsStore.totalFavorites === 0"
       class="mb-6"
@@ -20,6 +30,7 @@
       Cliquez sur le cœur d'une voiture pour l'ajouter !
     </v-alert>
 
+    <!-- getFavorites : objets voiture complets (le store ne garde que les ID dans localStorage) -->
     <v-row v-else>
       <v-col
         v-for="car in carsStore.getFavorites"

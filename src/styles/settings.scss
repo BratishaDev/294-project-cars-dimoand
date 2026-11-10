@@ -13,6 +13,8 @@
   $heading-font-family: ('Fraunces', serif),
 );
 
+// Animation « battement » du cœur : utilisée par la classe .favorite-active
+// (CarCard.vue et pages/car/[id].vue)
 @keyframes heartbeat {
   0%, 100% { transform: scale(1); }
   25%       { transform: scale(1.5); }

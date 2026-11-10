@@ -4,7 +4,11 @@
       Cars
     </h1>
 
-    <!-- Recherche, filtre et tri -->
+    <!--
+      Recherche, filtre et tri.
+      Les v-model sont branchés directement sur le state du store : les filtres sont donc
+      conservés quand on ouvre une voiture puis qu'on revient au catalogue.
+    -->
     <v-row align="center" class="mb-2">
       <v-col cols="12" lg="5" md="4">
         <v-text-field
@@ -46,6 +50,11 @@
         </v-btn>
       </v-col>
     </v-row>
+
+    <!--
+      Un seul des 4 blocs suivants s'affiche, dans cet ordre de priorité :
+      chargement → erreur → aucun résultat → grille de cartes.
+    -->
 
     <!-- Squelettes de chargement pendant la requête API -->
     <v-row v-if="carsStore.isLoading">
@@ -95,6 +104,7 @@
         md="6"
         sm="6"
       >
+        <!-- Une carte par génération : sa version principale + le nombre de versions -->
         <car-card :car="generation.main" :count="generation.count" />
       </v-col>
     </v-row>
@@ -108,8 +118,11 @@
   import { useCarsStore } from '@/stores/carStore'
 
   const carsStore = useCarsStore()
+  // storeToRefs : garde la réactivité quand on extrait des getters du store
+  // (une simple déstructuration ferait perdre la mise à jour automatique)
   const { generations, bodyTypes, hasActiveFilters } = storeToRefs(carsStore)
 
+  // value = ce qui est stocké dans carsStore.sortBy ; title = le texte affiché dans le menu
   const sortItems = [
     { title: 'Nom A → Z', value: 'name-asc' },
     { title: 'Nom Z → A', value: 'name-desc' },

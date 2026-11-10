@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia'
-import api from '@/plugins/axios'
+import { fetchVariants } from '@/services/api'
 
 export const useCarsStore = defineStore('cars', {
   state: () => ({
+    // Toutes les versions (variants) reçues de l'API, à plat
     cars: [],
     isLoading: false,
     error: null,
@@ -18,6 +19,7 @@ export const useCarsStore = defineStore('cars', {
     totalCars: (state) => state.cars.length,
 
     // Types de carrosserie disponibles (pour le menu déroulant)
+    // Set supprime les doublons, filter(Boolean) ignore les valeurs vides
     bodyTypes: (state) => {
       const types = state.cars.map(car => car.bodyTypeEn).filter(Boolean)
       return [...new Set(types)].sort()
@@ -30,6 +32,7 @@ export const useCarsStore = defineStore('cars', {
 
     // Versions qui passent la recherche et les filtres, puis triées
     filteredCars: (state) => {
+      // ?? '' : le champ « clearable » remet search à null quand on clique sur la croix
       const query = (state.search ?? '').trim().toLowerCase()
 
       const list = state.cars.filter(car => {
@@ -39,14 +42,18 @@ export const useCarsStore = defineStore('cars', {
       })
 
       // filter() a créé un nouveau tableau, on peut donc le trier sans toucher à state.cars
+      // direction : 1 = ordre A → Z, -1 = ordre inversé Z → A
       const direction = state.sortBy === 'name-desc' ? -1 : 1
       list.sort((a, b) => direction * (a.displayName ?? '').localeCompare(b.displayName ?? ''))
 
       return list
     },
 
-    // Liste des générations, construite à partir des versions filtrées
+    // Liste des générations, construite à partir des versions filtrées.
+    // Plusieurs versions ont le même generationId → elles forment UNE seule carte dans le catalogue.
+    // ⚠ Fonction normale (pas une flèche) : on a besoin de `this` pour lire un autre getter (this.filteredCars)
     generations () {
+      // Map : generationId → tableau de ses versions (garde l'ordre d'insertion, donc l'ordre du tri)
       const groups = new Map()
 
       for (const car of this.filteredCars) {
@@ -56,6 +63,7 @@ export const useCarsStore = defineStore('cars', {
         groups.get(car.generationId).push(car)
       }
 
+      // Map → tableau d'objets ; `main` = 1re version du groupe, c'est elle qui s'affiche sur la carte
       return Array.from(groups, ([generationId, variants]) => ({
         generationId,
         variants,
@@ -65,12 +73,14 @@ export const useCarsStore = defineStore('cars', {
     },
 
     // Toutes les versions d'une même génération (pour la page de détails)
+    // Number() : l'ID reçu peut être un texte (venant de l'URL) alors que generationId est un nombre ;
+    // sans conversion, "12" === 12 serait toujours faux
     getVariantsByGeneration: (state) => (generationId) => {
       const id = Number(generationId)
       return state.cars.filter(car => car.generationId === id)
     },
 
-    // Une version spécifique par ID
+    // Une version spécifique par ID (même conversion : l'ID de l'URL /car/:id est un texte)
     getCarById: (state) => (carId) => {
       const id = Number(carId)
       return state.cars.find(car => car.id === id)
@@ -85,6 +95,7 @@ export const useCarsStore = defineStore('cars', {
     },
 
     // Au moins une version de cette génération est-elle en favoris ?
+    // (sert au cœur « contour rouge » : une AUTRE version de la génération est en favoris)
     hasFavoriteInGeneration: (state) => (generationId) => {
       const id = Number(generationId)
       return state.cars.some(car => {
@@ -94,6 +105,7 @@ export const useCarsStore = defineStore('cars', {
 
     // Objets voiture des favoris (pas seulement les ID)
     getFavorites: (state) => {
+      // find() renvoie undefined si l'ID n'existe plus dans l'API → filter() retire ces trous
       const favoriteCars = state.favorites.map(favoriteId => {
         return state.cars.find(car => car.id === favoriteId)
       })
@@ -102,12 +114,14 @@ export const useCarsStore = defineStore('cars', {
   },
 
   actions: {
+    // withLoader = false permet de recharger les données sans réafficher les squelettes
     async fetchCars ({ withLoader = true } = {}) {
       if (withLoader) this.isLoading = true
 
       try {
-        const response = await api.get('/variants', { params: { limit: 100 } })
-        this.cars = response.data.data
+        // La requête HTTP est dans services/api.js ; en cas d'échec elle lève une erreur → catch ci-dessous
+        this.cars = await fetchVariants()
+        // Les voitures sont arrivées : on peut vérifier que les favoris existent encore
         this.cleanupFavorites()
       } catch (error) {
         console.error('Erreur:', error.message)
@@ -118,10 +132,13 @@ export const useCarsStore = defineStore('cars', {
       }
     },
 
+    // Appelée une seule fois au démarrage (App.vue)
     async init () {
       this.isLoading = true
       this.error = null
-      this.loadFavorites() // AVANT le chargement des voitures
+      // Les favoris sont lus AVANT le chargement des voitures :
+      // cleanupFavorites() (dans fetchCars) en a besoin pour les comparer aux voitures reçues
+      this.loadFavorites()
       try {
         await this.fetchCars()
       } catch (error) {
@@ -140,10 +157,12 @@ export const useCarsStore = defineStore('cars', {
     },
 
     // Charge les favoris depuis localStorage
+    // try/catch : JSON.parse plante si le texte stocké n'est pas du JSON valide
     loadFavorites () {
       try {
         const saved = localStorage.getItem('car_favorites')
         const parsed = saved ? JSON.parse(saved) : []
+        // Array.isArray : on ignore tout ce qui n'est pas un tableau (valeur modifiée à la main, ancien format…)
         this.favorites = Array.isArray(parsed) ? parsed : []
         console.log('Favoris chargés :', this.favorites.length, 'éléments')
       } catch (error) {
@@ -153,6 +172,7 @@ export const useCarsStore = defineStore('cars', {
     },
 
     // Sauvegarde les favoris dans localStorage
+    // try/catch : localStorage peut être indisponible (navigation privée, stockage plein)
     saveFavorites () {
       try {
         localStorage.setItem('car_favorites', JSON.stringify(this.favorites))
@@ -163,6 +183,7 @@ export const useCarsStore = defineStore('cars', {
 
     // Ajoute ou retire une version des favoris
     toggleFavorite (car) {
+      // findIndex renvoie -1 quand l'ID n'est pas encore dans les favoris
       const favoriteIndex = this.favorites.findIndex(
         favoriteId => favoriteId === car.id,
       )
@@ -178,6 +199,8 @@ export const useCarsStore = defineStore('cars', {
 
     // Supprime les favoris dont la voiture n'existe plus dans l'API
     cleanupFavorites () {
+      // Liste vide = l'API n'a rien renvoyé (panne, erreur réseau). On ne touche à rien :
+      // sinon tous les favoris seraient jugés « obsolètes » et effacés à cause d'un simple problème réseau
       if (this.cars.length === 0) return
 
       const initialCount = this.favorites.length

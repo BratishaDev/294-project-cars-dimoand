@@ -2,33 +2,41 @@
   import { useCarsStore } from '@/stores/carStore'
 
   const route = useRoute()
+  const router = useRouter()
   const carsStore = useCarsStore()
 
+  // Index du slide affiché. On démarre sur la 2e photo (index 1), comme sur la carte du catalogue
   const slide = ref(1)
+
+  // La version affichée, retrouvée grâce à l'ID de l'URL (/car/:id).
+  // Se recalcule toute seule si l'URL change. Vaut undefined tant que les voitures
+  // ne sont pas chargées, ou si l'ID n'existe pas.
   const car = computed(() => {
     return carsStore.getCarById(route.params.id)
   })
 
+  // ?? [] : évite une erreur quand la voiture n'est pas encore disponible
   const photos = computed(() => car.value?.url ?? [])
 
   // Toutes les versions de cette génération, de la moins puissante à la plus puissante
   const variants = computed(() => {
     if (!car.value) return []
     const list = carsStore.getVariantsByGeneration(car.value.generationId)
+    // [...list] : copie, pour trier sans modifier le tableau du store
     return [...list].sort((a, b) => a.powerHp - b.powerHp)
   })
 
   const fuelLabels = { petrol: 'Essence', diesel: 'Diesel', electric: 'Électrique', hybrid: 'Hybride' }
+  // ?? slug : si le carburant n'est pas dans la liste, on affiche le texte brut de l'API
   const fuelLabel = slug => fuelLabels[slug] ?? slug
 
   const formatPrice = n => (n != null ? `${n.toLocaleString('fr-CH')} €` : '—')
 
-  const summary = computed(() => {
-    const c = car.value
-    if (!c) return ''
-    return `Cette <strong>${c.displayName}</strong> est de type ${c.bodyTypeEn}, avec un moteur ${fuelLabel(c.fuelSlug)} de ${c.powerHp} ch.`
-  })
+  // Valeur + unité, ou « — » quand l'API ne fournit pas la donnée
+  // (certaines versions n'ont pas de temps 0–100 km/h : sans ça on verrait « undefined s »)
+  const formatValue = (value, unit) => (value != null ? `${value} ${unit}` : '—')
 
+  // Tuiles de caractéristiques ; .filter() retire celles que l'API ne donne pas pour cette voiture
   const specs = computed(() => {
     const c = car.value
     if (!c) return []
@@ -40,16 +48,33 @@
     ].filter(spec => spec.value != null)
   })
 
-  // En cas de passage à une autre version : galerie sur la 2e photo, retour en haut de la page
+  // Passer d'une version à une autre garde le MÊME composant (seul l'ID change, rien n'est recréé).
+  // On remet donc la galerie sur la 2e photo et on remonte en haut de la page « à la main ».
   watch(() => route.params.id, () => {
     slide.value = 1
     window.scrollTo({ top: 0, behavior: 'smooth' })
   })
 
+  // Bouton « Retour » : router.back() ne marche que s'il existe une page précédente DANS l'application.
+  // Si on arrive directement (lien, nouvel onglet), history.state.back vaut null → on va au catalogue.
+  function goBack () {
+    if (window.history.state?.back) {
+      router.back()
+    } else {
+      router.push('/')
+    }
+  }
+
+  // Une ligne du tableau ouvre la version correspondante (souris ET clavier)
+  function openVariant (id) {
+    router.push(`/car/${id}`)
+  }
+
   const showSnackbar = ref(false)
   const snackbarMessage = ref('')
 
   function handleToggleFavorite () {
+    // On lit l'état AVANT le changement, pour afficher le bon message
     const wasFavorite = carsStore.isFavorite(car.value)
     carsStore.toggleFavorite(car.value)
     snackbarMessage.value = wasFavorite ? 'Retiré des favoris' : 'Ajouté aux favoris'
@@ -70,13 +95,32 @@
       class="mb-4"
       prepend-icon="mdi-arrow-left"
       variant="text"
-      @click="$router.back()"
+      @click="goBack()"
     >
       Retour
     </v-btn>
 
+    <!--
+      Un seul de ces blocs s'affiche, dans cet ordre de priorité :
+      chargement → erreur API → ID inconnu → contenu.
+      Sans le 1er, un rafraîchissement de la page afficherait « Voiture non trouvée »
+      pendant que les voitures se chargent encore.
+    -->
+    <v-skeleton-loader
+      v-if="carsStore.isLoading"
+      type="image, article"
+    />
+
     <v-alert
-      v-if="!car"
+      v-else-if="carsStore.error"
+      type="error"
+      variant="tonal"
+    >
+      Impossible de charger les voitures. Réessayez plus tard.
+    </v-alert>
+
+    <v-alert
+      v-else-if="!car"
       type="error"
       variant="tonal"
     >
@@ -132,6 +176,7 @@
               {{ car.displayName }}
             </h1>
             <v-btn
+              :aria-label="carsStore.isFavorite(car) ? 'Retirer des favoris' : 'Ajouter aux favoris'"
               :class="{ 'favorite-active': carsStore.isFavorite(car) }"
               :color="carsStore.isFavorite(car) ? 'red' : ''"
               :icon="carsStore.isFavorite(car) ? 'mdi-heart' : 'mdi-heart-outline'"
@@ -146,7 +191,10 @@
             <v-chip v-if="car.bodyTypeEn">{{ car.bodyTypeEn }}</v-chip>
           </div>
 
-          <p class="text-body-1 mb-4" v-html="summary" />
+          <p class="text-body-1 mb-4">
+            Cette <strong>{{ car.displayName }}</strong> est de type {{ car.bodyTypeEn }},
+            avec un moteur {{ fuelLabel(car.fuelSlug) }} de {{ car.powerHp }} ch.
+          </p>
 
           <div class="text-h5 text-primary mb-4">
             {{ formatPrice(car.priceNewEur) }}
@@ -181,15 +229,22 @@
             <th>Puissance</th>
             <th>0–100 km/h</th>
             <th>Prix à la sortie</th>
+            <th>Favori</th>
           </tr>
         </thead>
         <tbody>
+          <!--
+            Ligne cliquable ET accessible au clavier (tabindex + touche Entrée).
+            La version affichée en ce moment est en gras et marquée d'une coche.
+          -->
           <tr
             v-for="variant in variants"
             :key="variant.id"
             class="cursor-pointer"
             :class="{ 'font-weight-bold': variant.id === car.id }"
-            @click="$router.push(`/car/${variant.id}`)"
+            tabindex="0"
+            @click="openVariant(variant.id)"
+            @keydown.enter="openVariant(variant.id)"
           >
             <td>
               <v-icon
@@ -201,12 +256,12 @@
               {{ variant.displayName }}
             </td>
             <td>{{ fuelLabel(variant.fuelSlug) }}</td>
-            <td>{{ variant.powerHp }} ch</td>
-            <td>{{ variant.accel0100S }} s</td>
+            <td>{{ formatValue(variant.powerHp, 'ch') }}</td>
+            <td>{{ formatValue(variant.accel0100S, 's') }}</td>
             <td>{{ formatPrice(variant.priceNewEur) }}</td>
             <td>
               <v-icon
-                :color="carsStore.isFavorite(variant) ? 'red' : 'grey'"
+                :color="carsStore.isFavorite(variant) ? 'red' : 'grey-darken-1'"
                 :icon="carsStore.isFavorite(variant) ? 'mdi-heart' : 'mdi-heart-outline'"
                 size="small"
               />

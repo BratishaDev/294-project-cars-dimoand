@@ -13,6 +13,9 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept-Language': 'fr',
   },
+  // Sans réponse après 10 s, Axios lève une erreur → le store affiche le message d'erreur
+  // (sans timeout, les squelettes de chargement pourraient tourner indéfiniment)
+  timeout: 10000,
 })
 
 // On exporte l'instance pour l'utiliser partout : import api from '@/plugins/axios'

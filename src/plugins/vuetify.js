@@ -14,6 +14,7 @@ import { createVuetify } from 'vuetify'
 // Thème « salon des années 60 » : cuir sombre, laiton et bordeaux
 export default createVuetify({
   theme: {
+    // 'system' : suit automatiquement le thème clair ou sombre de l'appareil de l'utilisateur
     defaultTheme: 'system',
     themes: {
       light: {
