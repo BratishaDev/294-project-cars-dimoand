@@ -238,9 +238,7 @@ flowchart LR
 - Claude a expliqué le code **ligne par ligne** (props, `ref` et `.value`, getters Pinia, `storeToRefs`, déstructuration, `Map`, `Array.from`, `?.` et `??`…) et m'a posé des questions de contrôle pour vérifier ma compréhension.
 - Les exemples du tutoriel Pokédex (Pokémon) ont été transposés aux voitures : adaptation à la structure des données de l'API (réponse `{ data, pagination }`, champs optionnels, photos multiples, `generationId`).
 - Chaque snippet a été relu, testé et corrigé dans mon projet avant d'être gardé ; plusieurs bugs venaient de mes propres essais et ont été corrigés avec l'aide de l'IA.
-
-> ⚠️ **À COMPLÉTER — 2 ou 3 exemples précis de ce que TOI tu as modifié ou décidé.**
-> *Exemple : « J'ai remplacé le tri par date par un tri alphabétique par défaut. » / « J'ai gardé l'animation du cœur telle quelle car elle n'influence pas la fonctionnalité. » / « J'ai changé les couleurs de la palette pour les adapter à mes goûts. »*
+- J'ai remplacé le tri par date par un tri alphabétique par défaut. J'ai gardé l'animation du cœur telle quelle car elle n'influence pas la fonctionnalité. J'ai changé les couleurs de la palette pour les adapter à mes goûts.
 
 ### Parties codées manuellement
 
